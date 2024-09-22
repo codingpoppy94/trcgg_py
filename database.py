@@ -299,6 +299,29 @@ class Database:
         """
         return self.execute_query(query, (game_id, ))
     
+    # 최근 Top 10 게임 조회
+    def findTopTen(self, riot_name):
+        query = """
+            SELECT 
+                GAME_ID, 
+                RIOT_NAME, 
+                CHAMP_NAME, 
+                POSITION, 
+                KILL, 
+                DEATH, 
+                ASSIST, 
+                GAME_RESULT, 
+                GAME_TEAM,
+                TOTAL_DAMAGE_CHAMPIONS,
+                VISION_BOUGHT
+            FROM LEAGUE
+            WHERE LOWER(RIOT_NAME) = LOWER(%s)
+            AND DELETE_YN = 'N'
+            ORDER BY GAME_DATE DESC
+            LIMIT 10
+        """
+        return self.execute_query(query, (riot_name, ))
+        
     # 부캐 닉네임 조회
     def findMappingName(self):
         query = """
@@ -351,7 +374,8 @@ class Database:
                 total_damage_champions,
                 total_damage_taken,
                 vision_score,
-                vision_bought
+                vision_bought,
+                puuid
             )
             VALUES %s
         """
@@ -379,7 +403,8 @@ class Database:
                 item['total_damage_champions'],
                 item['total_damage_taken'],
                 item['vision_score'],
-                item['vision_bought']
+                item['vision_bought'],
+                item['puuid']
             ) for item in params
         ]
         
