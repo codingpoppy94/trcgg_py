@@ -61,4 +61,45 @@ class LeagueService:
     def get_top_ten(self, riot_name):
         return self.db.findTopTen(riot_name)
     
+    # 리플 데이터 저장
+    def save_league(self, params):
+        return self.db.insertLeague(params)
+    
+    # 부캐닉 조회 
+    def get_mapping_name(self):
+        return self.db.findMappingName()
+    
+    # 중복 리플 파일 조회
+    def get_replay_name(self, game_id):
+        return self.db.findReplayName(game_id)
+    
+# 관리
+
+    # !부캐 저장
+    def save_mapping_name(self, sub_name, main_name):
+        return self.db.insertMappingName(sub_name, main_name)
+
+    # !탈퇴 - 리그 정보
+    def update_delete_yn(self, delete_yn, riot_name):
+        return self.db.changeDeleteYN(delete_yn, riot_name)
+    
+    # !탈퇴 - 부캐 닉네임
+    def update_mapping_delete_yn(self, delete_yn, riot_name):
+        return self.db.changeMappingDeleteYN(delete_yn, riot_name)
+    
+    # !닉변 - 리그 정보
+    def update_riot_name(self, new_name, old_name):
+        return self.db.changeRiotName(new_name, old_name)
+    
+    # !닉변 - 부캐 닉네임 
+    def update_mapping_riot_name(self, new_name, old_name):
+        return self.db.changeMappingRiotName(new_name, old_name)
+    
+    # !drop - 리플 삭제
+    def delete_league_by_game_id(self, game_id):
+        return self.db.deleteLeagueByGameId(game_id)
+    
+    # !부캐삭제
+    def delete_mapping_sub_name(self, riot_name):
+        return self.db.deleteMappingSubName(riot_name)
     

@@ -1,11 +1,21 @@
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from service import LeagueService
+from pydantic import BaseModel
 
 import parse
 
 app = FastAPI()  # FastAPI 인스턴스 생성
 
 ls = LeagueService()
+
+class Replay(BaseModel):
+    file_url: str
+    file_name: str
+    create_user: str
+    
+class Mapping(BaseModel):
+    sub_name: str
+    main_name: str
 
 # 전체전적조회
 @app.get("/league/getRecord/{riot_name}")
@@ -106,13 +116,88 @@ async def get_top_ten(riot_name: str):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     
-# Post
-
-# 리플레이 파싱 api 
-@app.post("/league/parse", status_code=201)
-async def replay_parse(file_url: str, file_name: str, create_user: str):
+@app.get("/league/getMappingName")
+async def get_mapping_name():
     try:
-        return parse.save(file_url, file_name, create_user)
+        result = ls.get_mapping_name()
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))    
+    
+# Post =====================
+
+# 리플레이 저장
+@app.post("/league/parse", status_code=200)
+async def replay_parse(data: Replay):
+    try:
+        return parse.save(data.file_url, data.file_name, data.create_user)
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+# 부캐 저장
+@app.post("/league/mapping", status_code=200)
+async def replay_parse(data: Mapping):
+    try:
+        return ls.save_mapping_name(data.sub_name, data.main_name)
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# PUT =====================
+
+# 탈퇴 - 리그 정보
+@app.put("/league/deleteYn", status_code=200)
+async def put_league_delete_yn(delete_yn: str, riot_name: str):
+    try:
+        return ls.update_delete_yn(delete_yn, riot_name)
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# 탈퇴 - 부캐 닉네임
+@app.put("/league/mapping/deleteYn", status_code=200)
+async def put_mapping_delete_yn(delete_yn: str, riot_name: str):
+    try:
+        return ls.update_mapping_delete_yn(delete_yn, riot_name)
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# 닉변 - 리그 정보 
+@app.put("/league/riotName", status_code=200)
+async def put_league_riot_name(new_name: str, old_name: str):
+    try:
+        return ls.update_riot_name(new_name, old_name)
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# 닉변 - 부캐 닉네임
+@app.put("/league/mapping/riotName", status_code=200)
+async def put_mapping_riot_name(new_name: str, old_name: str):
+    try:
+        return ls.update_mapping_riot_name(new_name, old_name)
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# 리플 삭제
+@app.delete("/league/game", status_code=200)
+async def delete_league_by_game_id(game_id: str):
+    try:
+        return ls.delete_league_by_game_id(game_id)
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# DELETE =====================
+
+# 부캐 삭제
+@app.delete("/league/mapping/subName", status_code=200)
+async def delete_mapping_sub_name(riot_name: str):
+    try:
+        return ls.delete_mapping_sub_name(riot_name)
         
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

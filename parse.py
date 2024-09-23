@@ -1,21 +1,24 @@
 from datetime import datetime
 from champion_dictionary import champion_dic
-import database as du
+from service import LeagueService
+
 import requests
 import json
 import io
 
+ls = LeagueService()
+
 # 리플레이 저장
 def save(file_url, file_name, create_user):  
         
-    # # test
-    # file=open('test/1T_0922_0550.rofl','rb')
-    # file_byte = file.readlines()
-    # bytes_data = None
-    # for bytes_data in file_byte:
-    #     continue
+    # test
+    file=open('test/1T_0922_0550.rofl','rb')
+    file_byte = file.readlines()
+    bytes_data = None
+    for bytes_data in file_byte:
+        continue
     
-    bytes_data = get_input_stream_discord_file(file_url)
+    # bytes_data = get_input_stream_discord_file(file_url)
     
     if bytes_data:
         stats_array = parse_replay_data(bytes_data)
@@ -121,22 +124,14 @@ def save_data(stats_array, file_name, create_user):
             pass
     
     # print(res_list)
-        
-    db=du.Database()
-    db.connect()
-    db.insertLeague(res_list)
-    db.close()
+    ls.save_league(res_list)
     
 # 매핑 이름 처리
 def set_mapping_name(name):
-    db=du.Database()
-    db.connect()
-    mappings = db.findMappingName()
-    db.close()
+    mappings = ls.get_mapping_name()
     
     for mapping in mappings:
         if name == mapping['sub_name']:            
-            print(mapping['main_name'])
             return mapping['main_name']
         
     return name
