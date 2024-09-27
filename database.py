@@ -336,7 +336,7 @@ class Database:
         return self.execute_query(query,None)
     
     # 중복 리플 파일명 조회
-    def findReplayName(self, game_id):
+    def countReplay(self, game_id):
         query = """
             SELECT
                 COUNT(*)

@@ -12,21 +12,24 @@ ls = LeagueService()
 def save(file_url, file_name, create_user):  
         
     # test
-    file=open('test/1T_0922_0550.rofl','rb')
-    file_byte = file.readlines()
-    bytes_data = None
-    for bytes_data in file_byte:
-        continue
+    # file=open('test/1t_0927_0038.rofl','rb')
+    # file_byte = file.readlines()
+    # bytes_data = None
+    # for bytes_data in file_byte:
+    #     continue
     
-    # bytes_data = get_input_stream_discord_file(file_url)
-    
-    if bytes_data:
-        stats_array = parse_replay_data(bytes_data)
-        save_data(stats_array, file_name, create_user)
-        return 'success'
-    else:
-        raise Exception("파일 데이터 저장 중 에러.")
-
+    if check_duplicate(file_name) : 
+        bytes_data = get_input_stream_discord_file(file_url)
+        
+        if bytes_data:
+            stats_array = parse_replay_data(bytes_data)
+            save_data(stats_array, file_name, create_user)
+            return f":green_circle:등록완료: {file_name} 반영 완료"
+        else:
+            raise Exception("파일 데이터 저장 중 에러.")
+    else :
+        return f":red_circle:등록실패: {file_name} 중복된 리플 파일 등록"
+   
 # 데이터 파싱 로직
 def parse_replay_data(byte):
     
@@ -133,10 +136,16 @@ def set_mapping_name(name):
     for mapping in mappings:
         if name == mapping['sub_name']:            
             return mapping['main_name']
-        
     return name
+
+# 리플 파일명 중복 확인
+def check_duplicate(file_name):
+    result = ls.count_by_replay_name(file_name)
+    if result[0]['count'] > 0 :
+        return False
+    else :
+        return True
    
-    
 # 예시 사용
 # file_url = 'https://example.com/discordfile'
 # try:

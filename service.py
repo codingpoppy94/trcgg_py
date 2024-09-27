@@ -70,8 +70,8 @@ class LeagueService:
         return self.db.findMappingName()
     
     # 중복 리플 파일 조회
-    def get_replay_name(self, game_id):
-        return self.db.findReplayName(game_id)
+    def count_by_replay_name(self, game_id):
+        return self.db.countReplay(game_id)
     
 # 관리
 
