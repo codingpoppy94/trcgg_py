@@ -1,0 +1,10 @@
+
+# docker build -t trc_service:1.0 .
+
+docker buildx build --platform linux/arm64 -t codingpoppy94/trc_service:1.0 .
+
+docker push codingpoppy94/trc_service:1.0 
+
+docker pull codingpoppy94/trc_service:1.0
+
+docker run -d --name trc_service -p 24002:24002 --network trc_network codingpoppy94/trc_service:1.0
