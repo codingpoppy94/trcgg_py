@@ -16,6 +16,22 @@ class Replay(BaseModel):
 class Mapping(BaseModel):
     sub_name: str
     main_name: str
+    
+# 전적 조회에 필요한 서비스들
+@app.get("/league/getAllRecord/{riot_name}")
+async def get_all_record(riot_name: str):
+    try:
+        data = {
+            "record_data": ls.get_record(riot_name),
+            "month_data": ls.get_record_month(riot_name),
+            "recent_data": ls.get_top_ten(riot_name),
+            "with_team_data": ls.get_record_with_team(riot_name),
+            "other_team_data": ls.get_record_other_team(riot_name),
+            "most_pick_data": ls.get_most_pick(riot_name)
+        }
+        return data
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 # 전체전적조회
 @app.get("/league/getRecord/{riot_name}")
