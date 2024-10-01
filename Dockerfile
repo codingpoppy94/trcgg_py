@@ -8,6 +8,7 @@ WORKDIR /src
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
+ENV TZ=Asia/Seoul
 # CMD ["uvicorn", "main:app"]
 # CMD ["uvicorn", "main:app", "--host", "127.0.0.1", "--port", "80"]
 # CMD ["fastapi", "run", "src/main.py", "--port", "80"]
