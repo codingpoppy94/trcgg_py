@@ -151,6 +151,15 @@ async def get_mapping_name(guild_id: str):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))    
     
+# 길드 조회
+@app.get("/league/getGuild/{guild_id}")
+async def get_guild(guild_id: str):
+    try:
+        result = ls.get_guild(guild_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))    
+    
 # Post =====================
 
 # 리플레이 저장
