@@ -50,7 +50,7 @@ class Database:
     ## SELECT ====================================================
 
     # 전체 전적 조회
-    def findRecord(self, riot_name):
+    def findRecord(self, riot_name, guild_id):
         query = """
             SELECT 
                 POSITION,
@@ -67,6 +67,7 @@ class Database:
                 END AS KDA
             FROM LEAGUE
             WHERE LOWER(RIOT_NAME) = LOWER(%s)
+            AND GUILD_ID = %s
             AND DELETE_YN = 'N'
             GROUP BY POSITION
             ORDER BY 
@@ -78,10 +79,10 @@ class Database:
                 WHEN 'SUP' THEN 5
             END
         """
-        return self.execute_query(query, (riot_name,))
+        return self.execute_query(query, (riot_name, guild_id,))
     
     # 최근 한달 전적
-    def findRecordMonth(self, riot_name):
+    def findRecordMonth(self, riot_name, guild_id):
         query = """
             SELECT 
                 COUNT(*) AS TOTAL_COUNT,
@@ -97,15 +98,16 @@ class Database:
                 END AS KDA
             FROM LEAGUE
             WHERE LOWER(RIOT_NAME) = LOWER(%s)
+            AND GUILD_ID = %s 
             AND DELETE_YN = 'N'
             AND GAME_DATE >= DATE_TRUNC('month', CURRENT_TIMESTAMP)
             AND GAME_DATE < DATE_TRUNC('month', CURRENT_TIMESTAMP) + INTERVAL '1 month'
             
         """
-        return self.execute_query(query, (riot_name,))
+        return self.execute_query(query, (riot_name, guild_id,))
     
     # 모스트픽
-    def findMostPick(self, riot_name):
+    def findMostPick(self, riot_name, guild_id):
         query = """
             SELECT 
                 CHAMP_NAME,
@@ -115,15 +117,16 @@ class Database:
                 ROUND(COUNT(CASE WHEN GAME_RESULT = '승' THEN 1 END)::numeric / COUNT(*) * 100 ,2) AS WIN_RATE
             FROM LEAGUE
             WHERE LOWER(RIOT_NAME) = LOWER(%s)
+            AND GUILD_ID = %s
             AND DELETE_YN = 'N'
             GROUP BY CHAMP_NAME
             ORDER BY TOTAL_COUNT DESC 
             LIMIT 10
         """
-        return self.execute_query(query, (riot_name,))
+        return self.execute_query(query, (riot_name, guild_id,))
     
     # 장인
-    def findChampMaster(self, champ_name):
+    def findChampMaster(self, champ_name, guild_id):
         query = """
             SELECT 
                 RIOT_NAME, 
@@ -133,15 +136,16 @@ class Database:
                 ROUND(COUNT(CASE WHEN GAME_RESULT = '승' THEN 1 END)::NUMERIC / COUNT(*) * 100 ,2) AS WIN_RATE
             FROM LEAGUE 
             WHERE CHAMP_NAME = %s
+            AND GUILD_ID = %s
             AND DELETE_YN = 'N'
             GROUP BY RIOT_NAME 
             HAVING COUNT(RIOT_NAME) >= 10
             ORDER BY TOTAL_COUNT DESC
         """
-        return self.execute_query(query, (champ_name,))
+        return self.execute_query(query, (champ_name, guild_id,))
         
     # 통계 챔피언    
-    def findChampStats(self, year, month):
+    def findChampStats(self, guild_id, year, month):
         query = """
             SELECT 
                 CHAMP_NAME,
@@ -151,15 +155,16 @@ class Database:
                 ROUND(COUNT(CASE WHEN game_result = '승' THEN 1 END)::numeric / COUNT(*)*100,2) AS win_rate
             FROM LEAGUE 
             WHERE DELETE_YN = 'N'
+            AND GUILD_ID = %s
                 AND EXTRACT(YEAR FROM GAME_DATE) = %s
                 AND EXTRACT(MONTH FROM GAME_DATE) = %s
             GROUP BY CHAMP_NAME
             HAVING COUNT(CHAMP_NAME) >= 20
         """
-        return self.execute_query(query, (year, month))    
+        return self.execute_query(query, (guild_id, year, month))    
         
     # 통계 게임
-    def findGameStats(self, year, month):
+    def findGameStats(self, guild_id, year, month):
         query = """
             SELECT 
                 RIOT_NAME,
@@ -173,15 +178,16 @@ class Database:
                 END AS KDA
             FROM LEAGUE 
             WHERE DELETE_YN = 'N'
+            AND GUILD_ID = %s
                 AND EXTRACT(YEAR FROM GAME_DATE) = %s
                 AND EXTRACT(MONTH FROM GAME_DATE) = %s
             GROUP BY RIOT_NAME
             ORDER BY TOTAL_COUNT DESC
         """
-        return self.execute_query(query, (year, month))
+        return self.execute_query(query, (guild_id, year, month))
         
     # 최근 두달간 같은 팀 시너지
-    def findRecordWithTeam(self, riot_name):
+    def findRecordWithTeam(self, riot_name, guild_id):
         query = """
             SELECT 
                 A.RIOT_NAME,
@@ -194,6 +200,7 @@ class Database:
             (
                 SELECT * FROM LEAGUE 
                 WHERE LOWER(RIOT_NAME) = LOWER(%s)
+                AND GUILD_ID = %s
                 AND (
                     (EXTRACT(YEAR FROM GAME_DATE) = EXTRACT(YEAR FROM CURRENT_DATE)
                     AND EXTRACT(MONTH FROM GAME_DATE) = EXTRACT(MONTH FROM CURRENT_DATE))
@@ -203,6 +210,7 @@ class Database:
                     )
             ) B
             ON A.GAME_TEAM = B.GAME_TEAM 
+            AND A.GUILD_ID = B.GUILD_ID
             AND A.GAME_ID = B.GAME_ID 
             AND LOWER(A.RIOT_NAME) != LOWER(%s)
             AND A.DELETE_YN = 'N'
@@ -210,10 +218,10 @@ class Database:
             HAVING  COUNT(A.RIOT_NAME) >= 5
             ORDER BY WIN_RATE DESC
         """
-        return self.execute_query(query, (riot_name, riot_name))
+        return self.execute_query(query, (riot_name, guild_id, riot_name))
         
     # 나와 인간상성 찾기
-    def findRecordOtherTeam(self, riot_name):
+    def findRecordOtherTeam(self, riot_name, guild_id):
         query = """
             SELECT 
                 A.RIOT_NAME,
@@ -226,6 +234,7 @@ class Database:
             (
                 SELECT * FROM LEAGUE 
                 WHERE LOWER(RIOT_NAME) = LOWER(%s)
+                AND GUILD_ID = %s
                 AND (
                     (EXTRACT(YEAR FROM GAME_DATE) = EXTRACT(YEAR FROM CURRENT_DATE)
                     AND EXTRACT(MONTH FROM GAME_DATE) = EXTRACT(MONTH FROM CURRENT_DATE))
@@ -243,10 +252,10 @@ class Database:
             HAVING  COUNT(A.RIOT_NAME) >= 5
             ORDER BY WIN_RATE DESC
         """
-        return self.execute_query(query, (riot_name, riot_name))
+        return self.execute_query(query, (riot_name, guild_id, riot_name))
         
     # 라인별 승률 조회
-    def findRecordLine(self, position):
+    def findRecordLine(self, position, guild_id):
         query = """
             SELECT 	
                 POSITION,
@@ -261,17 +270,18 @@ class Database:
                 END AS KDA
             FROM LEAGUE  
             WHERE POSITION = %s
+            AND GUILD_ID = %s
             AND DELETE_YN = 'N'
             GROUP BY POSITION, RIOT_NAME 
-            HAVING COUNT(RIOT_NAME) >= 50
+            HAVING COUNT(RIOT_NAME) >= 30
             ORDER BY WIN_RATE DESC
             LIMIT 15   
         """
-        return self.execute_query(query, (position, ))
+        return self.execute_query(query, (position, guild_id))
     
     
     # 게임 결과
-    def findRecordByGameId(self, game_id):
+    def findRecordByGameId(self, game_id, guild_id):
         query = """
             SELECT 
                 GAME_ID, 
@@ -287,6 +297,7 @@ class Database:
                 VISION_BOUGHT
             FROM LEAGUE
             WHERE LOWER(GAME_ID) = LOWER(%s)
+            AND GUILD_ID = %s
             AND DELETE_YN = 'N'
             ORDER BY GAME_TEAM,
                 CASE POSITION
@@ -297,10 +308,10 @@ class Database:
                 WHEN 'SUP' THEN 5
             END
         """
-        return self.execute_query(query, (game_id, ))
+        return self.execute_query(query, (game_id, guild_id))
     
     # 최근 Top 10 게임 조회
-    def findTopTen(self, riot_name):
+    def findTopTen(self, riot_name, guild_id):
         query = """
             SELECT 
                 GAME_ID, 
@@ -316,14 +327,15 @@ class Database:
                 VISION_BOUGHT
             FROM LEAGUE
             WHERE LOWER(RIOT_NAME) = LOWER(%s)
+            AND GUILD_ID = %s
             AND DELETE_YN = 'N'
             ORDER BY GAME_DATE DESC
             LIMIT 10
         """
-        return self.execute_query(query, (riot_name, ))
+        return self.execute_query(query, (riot_name, guild_id))
         
     # 부캐 닉네임 조회
-    def findMappingName(self):
+    def findMappingName(self, guild_id):
         query = """
             SELECT 
                 SUB_NAME,
@@ -332,20 +344,35 @@ class Database:
                 MAPPING_NAME
             WHERE 
                 DELETE_YN = 'N'
+            AND GUILD_ID = %s
         """
-        return self.execute_query(query,None)
+        return self.execute_query(query, (guild_id, ))
     
-    # 중복 리플 파일명 조회
-    def countReplay(self, game_id):
+    # 중복 리플 파일 조회
+    def countReplay(self, game_id, guild_id):
         query = """
             SELECT
                 COUNT(*)
             FROM
                 LEAGUE
             WHERE
-                GAME_ID = %s
+                LOWER(GAME_ID) = LOWER(%s)
+            AND GUILD_ID = %s
         """
-        return self.execute_query(query, (game_id, ))
+        return self.execute_query(query, (game_id, guild_id))
+    
+    # 길드 조회
+    def findGuild(self, guild_id):
+        query = """
+            SELECT
+                guild_id, guild_name
+            FROM
+                guild
+            WHERE
+                guild_id = %s
+            
+        """
+        return self.execute_query(query, (guild_id, ))
         
     ## INSERT ====================================================
     
@@ -375,7 +402,8 @@ class Database:
                 total_damage_taken,
                 vision_score,
                 vision_bought,
-                puuid
+                puuid,
+                guild_id
             )
             VALUES %s
         """
@@ -404,7 +432,8 @@ class Database:
                 item['total_damage_taken'],
                 item['vision_score'],
                 item['vision_bought'],
-                item['puuid']
+                item['puuid'],
+                item['guild_id']
             ) for item in params
         ]
         
@@ -416,7 +445,7 @@ class Database:
     # 리플 데이터 저장 ver2 all one
     
     # 부캐닉 저장
-    def insertMappingName(self, sub_name, main_name):
+    def insertMappingName(self, sub_name, main_name, guild_id):
         query = """
             INSERT INTO MAPPING_NAME
             (
@@ -424,7 +453,8 @@ class Database:
                 MAIN_NAME,
                 CREATE_DATE,
                 UPDATE_DATE,
-                DELETE_YN
+                DELETE_YN,
+                GUILD_ID
             )
             VALUES 
             (
@@ -432,71 +462,98 @@ class Database:
                 %s,
                 CURRENT_TIMESTAMP,
                 CURRENT_TIMESTAMP,
-                'N'
+                'N',
+                %s
             )
         """
 
-        params = (sub_name, main_name)
+        params = (sub_name, main_name, guild_id)
         self.cursor.execute(query, params)
         self.db.commit()
-        
+    
+    # 길드 추가
+    def insertGuild(self, guild_id, guild_name):
+        query = """
+            INSERT INTO GUILD
+            (
+                GUILD_ID,
+                GUILD_NAME,
+                CREATE_DATE,
+                UPDATE_DATE
+            )
+            VALUES 
+            (
+                %s,
+                %s,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+            )
+        """
+
+        params = (guild_id, guild_name)
+        self.cursor.execute(query, params)
+        self.db.commit()
     
     ## UPDATE ====================================================
     
     # 탈퇴 및 복구 회원처리 - 리그정보
-    def changeDeleteYN(self, delete_yn, riot_name):
+    def changeDeleteYN(self, delete_yn, riot_name, guild_id):
         query = """
             UPDATE LEAGUE
                 SET DELETE_YN = %s,
                 UPDATE_DATE = CURRENT_TIMESTAMP
             WHERE 
                 RIOT_NAME = %s
+            AND GUILD_ID = %s
         """
         
-        params = (delete_yn, riot_name)
+        params = (delete_yn, riot_name, guild_id)
         self.cursor.execute(query, params)
         self.db.commit()
         return self.cursor.rowcount
         
     # 탈퇴 및 복구 회원처리 - 부캐닉
-    def changeMappingDeleteYN(self, delete_yn, riot_name):
+    def changeMappingDeleteYN(self, delete_yn, riot_name, guild_id):
         query = """
             UPDATE MAPPING_NAME
                 SET DELETE_YN = %s,
                 UPDATE_DATE = CURRENT_TIMESTAMP
             WHERE 
                 MAIN_NAME = %s
+            AND GUILD_ID = %s
         """
         
-        params = (delete_yn, riot_name)
+        params = (delete_yn, riot_name, guild_id)
         self.cursor.execute(query, params)
         self.db.commit()
         return self.cursor.rowcount
     
     # 닉네임 변경 - 리그정보
-    def changeRiotName(self, new_name, old_name):
+    def changeRiotName(self, new_name, old_name, guild_id):
         query = """
             UPDATE LEAGUE
                 SET RIOT_NAME = %s,
                 UPDATE_DATE = CURRENT_TIMESTAMP
             WHERE RIOT_NAME = %s
+            AND GUILD_ID = %s
         """
         
-        params = (new_name, old_name)
+        params = (new_name, old_name, guild_id)
         self.cursor.execute(query, params)
         self.db.commit()
         return self.cursor.rowcount
     
     # 닉네임 변경 - 부캐닉    
-    def changeMappingRiotName(self, new_name, old_name):
+    def changeMappingRiotName(self, new_name, old_name, guild_id):
         query = """
             UPDATE MAPPING_NAME
                 SET MAIN_NAME = %s,
                 UPDATE_DATE = CURRENT_TIMESTAMP
             WHERE MAIN_NAME = %s
+            AND GUILD_ID = %s
         """
         
-        params = (new_name, old_name)
+        params = (new_name, old_name, guild_id)
         self.cursor.execute(query, params)
         self.db.commit()
         return self.cursor.rowcount
@@ -504,25 +561,27 @@ class Database:
     ## DELETE ====================================================
     
     # !drop 리플 삭제
-    def deleteLeagueByGameId(self, game_id):
+    def deleteLeagueByGameId(self, game_id, guild_id):
         query = """
             DELETE FROM LEAGUE
-                WHERE GAME_ID = %s
+                WHERE LOWER(GAME_ID) = LOWER(%s)
+            AND GUILD_ID = %s
         """
         
-        params = (game_id,)
+        params = (game_id, guild_id)
         self.cursor.execute(query, params)
         self.db.commit()
         return self.cursor.rowcount
     
     # 부캐삭제
-    def deleteMappingSubName(self, riot_name):
+    def deleteMappingSubName(self, riot_name, guild_id):
         query = """
             DELETE FROM MAPPING_NAME
                 WHERE SUB_NAME = %s
+            AND GUILD_ID = %s
         """
         
-        params = (riot_name,)
+        params = (riot_name, guild_id)
         self.cursor.execute(query, params)
         self.db.commit()
         return self.cursor.rowcount

@@ -9,7 +9,7 @@ import io
 ls = LeagueService()
 
 # 리플레이 저장
-def save(file_url, file_name, create_user):  
+def save(file_url, file_name, create_user, guild_id):  
         
     # test
     # file=open('test/1t_0927_0038.rofl','rb')
@@ -18,12 +18,12 @@ def save(file_url, file_name, create_user):
     # for bytes_data in file_byte:
     #     continue
     
-    if check_duplicate(file_name) : 
+    if check_duplicate(file_name, guild_id) : 
         bytes_data = get_input_stream_discord_file(file_url)
         
         if bytes_data:
             stats_array = parse_replay_data(bytes_data)
-            save_data(stats_array, file_name, create_user)
+            save_data(stats_array, file_name, create_user, guild_id)
             return f":green_circle:등록완료: {file_name} 반영 완료"
         else:
             raise Exception("파일 데이터 저장 중 에러.")
@@ -78,7 +78,7 @@ def change_byte_array(raw_stream):
         return None
     
 # 파싱한 데이터 save
-def save_data(stats_array, file_name, create_user):
+def save_data(stats_array, file_name, create_user, guild_id):
     # print('set 시작')
     current_year = datetime.now().year
     date_time = file_name.split("_")
@@ -104,7 +104,7 @@ def save_data(stats_array, file_name, create_user):
                  'death':d['NUM_DEATHS'],
                  'kill':d['CHAMPIONS_KILLED'],
                  'position':d['TEAM_POSITION'].replace('JUNGLE', 'JUG').replace('BOTTOM', 'ADC').replace('UTILITY', 'SUP').replace('MIDDLE', 'MID'),
-                 'riot_name':set_mapping_name(d['NAME'].replace(' ','').replace('й','n').strip()),
+                 'riot_name':set_mapping_name(d['NAME'].replace(' ','').replace('й','n').strip(), guild_id),
                  'game_result':d['WIN'].replace('Win','승').replace('Fail','패'),
                  'champ_name': champion_dic.dic[d['SKIN'].lower().strip()],
                  'game_team':d['TEAM'].replace('100','blue').replace('200','red'),
@@ -119,7 +119,8 @@ def save_data(stats_array, file_name, create_user):
                  'game_date':game_date,
                  'create_user':create_user,
                  'game_id':file_name.lower(),
-                 'delete_yn':'N'
+                 'delete_yn':'N',
+                 'guild_id':guild_id
                  }
             )
         except Exception as e:
@@ -130,8 +131,8 @@ def save_data(stats_array, file_name, create_user):
     ls.save_league(res_list)
     
 # 매핑 이름 처리
-def set_mapping_name(name):
-    mappings = ls.get_mapping_name()
+def set_mapping_name(name, guild_id):
+    mappings = ls.get_mapping_name(guild_id)
     
     for mapping in mappings:
         if name == mapping['sub_name']:            
@@ -139,8 +140,8 @@ def set_mapping_name(name):
     return name
 
 # 리플 파일명 중복 확인
-def check_duplicate(file_name):
-    result = ls.count_by_replay_name(file_name)
+def check_duplicate(file_name, guild_id):
+    result = ls.count_by_replay_name(file_name, guild_id)
     if result[0]['count'] > 0 :
         return False
     else :
