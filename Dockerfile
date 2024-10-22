@@ -1,11 +1,14 @@
-FROM python:3.10.0
+FROM python:3.10-slim
 
 COPY ./src /src
 COPY requirements.txt /src
 
 WORKDIR /src
 
-RUN python -m pip install --no-cache-dir -r --upgrade requirements.txt
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+RUN python -m pip install --no-cache-dir --upgrade -r requirements.txt
 
 ENV TZ=Asia/Seoul
 # CMD ["uvicorn", "main:app"]
