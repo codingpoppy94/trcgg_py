@@ -25,6 +25,11 @@ jobs:
         DB_HOST: ${{ secrets.WAS_HOST }}
         DB_PORT: ${{ secrets.DB_PORT }}
         DB_NAME: ${{ secrets.DB_NAME }}
+
+    # STEP - move .env file to /src
+    - name: Moving .env file to /src
+      run: |
+        mv .env /src/.env
     
     # STEP - CHECKOUT
     - name: Checkout source code
