@@ -13,12 +13,6 @@ jobs:
       # STEP - CHECKOUT
       - name: Checkout source code
         uses: actions/checkout@v4
-      
-      # STEP - BUILD - Docker image
-      - name: Build the Docker image
-        run: |
-          docker buildx create --use
-          docker buildx build --platform linux/arm64 -t codingpoppy94/trc_service:1.0 .
 
       # STEP - ACCESS - Docker Hub
       - name: Connect to Docker hub
@@ -27,9 +21,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # STEP - PUBLISH 
-      - name: Publish to docker hub
-        run: docker push codingpoppy94/trc_service:1.0
+      # STEP - BUILD&PUBLISH - Docker image
+      - name: Build and Publishing the Docker image
+        run: |
+          docker buildx create --use
+          docker buildx build --platform linux/arm64 \
+          --tag codingpoppy94/trc_service:1.0 \
+          --push .
 
       # STEP - ACCESS - TRC.GG Server
       - name: Connect to trc.gg Server
