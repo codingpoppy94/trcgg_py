@@ -14,21 +14,13 @@ jobs:
     # STEP - VARIABLE SETTING
     - name: Setting Variables from .env
       run: |
-        echo "DB_USERNAME=$DB_USERNAME" >> .env
-        echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-        echo "DB_HOST=$DB_HOST" >> .env
-        echo "DB_PORT=$DB_PORT" >> .env
-        echo "DB_NAME=$DB_NAME" >> .env
-      env: 
-        DB_USERNAME: ${{ secrets.DB_USERNAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_HOST: ${{ secrets.WAS_HOST }}
-        DB_PORT: ${{ secrets.DB_PORT }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-
-    # STEP - move .env file to /src
-    - name: Moving .env file to /src
-      run: |
+        touch .env
+        echo DB_USERNAME: ${{ secrets.DB_USERNAME }} >> .env
+        echo DB_PASSWORD: ${{ secrets.DB_PASSWORD }} >> .env
+        echo DB_HOST: ${{ secrets.WAS_HOST }} >> .env
+        echo DB_PORT: ${{ secrets.DB_PORT }} >> .env
+        echo DB_NAME: ${{ secrets.DB_NAME }} >> .env
+        cat .env
         mv .env /src/.env
     
     # STEP - CHECKOUT
