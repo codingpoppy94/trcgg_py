@@ -1,10 +1,24 @@
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from service import LeagueService
 from pydantic import BaseModel
 
 import parse
 
 app = FastAPI()  # FastAPI 인스턴스 생성
+
+# CORS 설정
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=False, # cookie 포함 여부를 설정한다. 기본은 False
+    allow_methods=["*"],    # 허용할 method를 설정할 수 있으며, 기본값은 'GET'이다.
+    allow_headers=["*"],	# 허용할 http header 목록을 설정할 수 있으며 Content-Type, Accept, Accept-Language, Content-Language은 항상 허용된다.
+)
 
 ls = LeagueService()
 
