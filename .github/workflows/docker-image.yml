@@ -12,8 +12,17 @@ jobs:
     steps:
     # STEP - ACCESS - TRC.GG Server
     - name: Connect to trc.gg Server
-      run: |
-        echo ${{ secrets.WAS_HOST }}
-        echo ${{ secrets.WAS_USERNAME }}
-        echo ${{ secrets.SSH_KEY }}
-        echo ${{ secrets.WAS_SSH_PORT }}
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.WAS_HOST }}
+        username: ${{ secrets.WAS_USERNAME }}
+        password: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.WAS_SSH_PORT }}
+        script: |
+          docker stop $(docker ps -a -q)
+          docker rm $(docker ps -a -q)
+          docker pull codingpoppy94/trc_service:1.0
+          docker pull codingpoppy94/trc_bot:1.0
+          docker network create trc_network
+          docker run -d --name trc_service -p 24001:24001 --network trc_network codingpoppy94/trc_service:1.0
+          docker run -d --name trc_bot --network trc_network codingpoppy94/trc_bot:1.0
