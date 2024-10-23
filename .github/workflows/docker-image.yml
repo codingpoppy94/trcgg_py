@@ -24,10 +24,7 @@ jobs:
         echo "DB_HOST=$DB_HOST" >> .env
         echo "DB_PORT=$DB_PORT" >> .env
         echo "DB_NAME=$DB_NAME" >> .env
-        
-        # List files in the current directory and print them
-        ls_output=$(ls)
-        echo "$ls_output"
+        mv .env /src/.env
       env:
         DB_USERNAME: ${{ secrets.DB_USERNAME }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
