@@ -18,11 +18,11 @@ jobs:
     # STEP - VARIABLE SETTING
     - name: Set Environment Variables and List Files
       run: |
-        echo "DB_USERNAME=$DB_USERNAME" >> .env
-        echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-        echo "DB_HOST=$DB_HOST" >> .env
-        echo "DB_PORT=$DB_PORT" >> .env
-        echo "DB_NAME=$DB_NAME" >> .env
+        echo "DB_USERNAME=$DB_USERNAME" >> src/.env
+        echo "DB_PASSWORD=$DB_PASSWORD" >> src/.env
+        echo "DB_HOST=$DB_HOST" >> src/.env
+        echo "DB_PORT=$DB_PORT" >> src/.env
+        echo "DB_NAME=$DB_NAME" >> src/.env
         cat src/.env
       env:
         DB_USERNAME: ${{ secrets.DB_USERNAME }}
