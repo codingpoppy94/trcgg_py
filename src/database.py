@@ -114,7 +114,11 @@ class Database:
                 COUNT(CHAMP_NAME) AS TOTAL_COUNT,
                 COUNT(CASE WHEN GAME_RESULT = '승' THEN 1 END) AS WIN,
                 COUNT(CASE WHEN GAME_RESULT = '패' THEN 1 END) AS LOSE,
-                ROUND(COUNT(CASE WHEN GAME_RESULT = '승' THEN 1 END)::numeric / COUNT(*) * 100 ,2) AS WIN_RATE
+                ROUND(COUNT(CASE WHEN GAME_RESULT = '승' THEN 1 END)::numeric / COUNT(*) * 100 ,2) AS WIN_RATE,
+                CASE
+                    WHEN SUM(DEATH) = 0 THEN 9999
+                    ELSE ROUND((SUM(KILL) + SUM(ASSIST))::NUMERIC / NULLIF(SUM(DEATH), 0), 2) 
+                END AS KDA
             FROM LEAGUE
             WHERE LOWER(RIOT_NAME) = LOWER(%s)
             AND GUILD_ID = %s
