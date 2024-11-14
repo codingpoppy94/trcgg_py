@@ -106,7 +106,7 @@ def save_data(stats_array, file_name, create_user, guild_id):
                  'position':d['TEAM_POSITION'].replace('JUNGLE', 'JUG').replace('BOTTOM', 'ADC').replace('UTILITY', 'SUP').replace('MIDDLE', 'MID'),
                  'riot_name':set_mapping_name(d['NAME'].replace(' ','').replace('й','n').strip(), guild_id),
                  'game_result':d['WIN'].replace('Win','승').replace('Fail','패'),
-                 'champ_name': champion_dic.dic[d['SKIN'].lower().strip()],
+                 'champ_name': champion_dic.dic[d['SKIN'].lower().strip(), d['SKIN'].lower()],
                  'game_team':d['TEAM'].replace('100','blue').replace('200','red'),
                  'gold':d['GOLD_EARNED'],
                  'ccing':d['TIME_CCING_OTHERS'],
