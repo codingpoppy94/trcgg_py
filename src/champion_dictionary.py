@@ -13,6 +13,7 @@ class championDic:
             "ashe": "애쉬",
             "aurelionsol": "아우렐리온솔",
             "aurora": "오로라", 
+            "ambessa": "암베사",
             "azir": "아지르",
             "bard": "바드",
             "belveth": "벨베스",
