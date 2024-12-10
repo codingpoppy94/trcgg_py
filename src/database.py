@@ -349,6 +349,7 @@ class Database:
             WHERE 
                 DELETE_YN = 'N'
             AND GUILD_ID = %s
+            ORDER BY UPDATE_DATE DESC
         """
         return self.execute_query(query, (guild_id, ))
     
